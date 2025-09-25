@@ -133,6 +133,54 @@
 			"response": []
 		},
 		{
+			"name": "GET Directors by ID 9999",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", function() {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"Respons adalah objek dengan skema yang benar\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.all.keys('id','name','birthYear');",
+							"})",
+							"",
+							"pm.test(\"Nilai ID di dalam respons sesuai dengan yang diminta\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData.id).to.eql(1);",
+							"})",
+							"",
+							"pm.test(\"Status respons adalah 404 FAILED\", function() {",
+							"    pm.response.to.have.status(404);",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3300/directors/9999",
+					"host": [
+						"localhost"
+					],
+					"port": "3300",
+					"path": [
+						"directors",
+						"9999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "GET Movies by ID",
 			"event": [
 				{
@@ -171,6 +219,54 @@
 					"path": [
 						"movies",
 						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Movies by ID 9999",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", function() {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"Respons adalah objek dengan skema yang benar\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.all.keys('id','title','director','year');",
+							"})",
+							"",
+							"pm.test(\"Nilai ID di dalam respons sesuai dengan yang diminta\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData.id).to.eql(1);",
+							"})",
+							"",
+							"pm.test(\"Status respons adalah 404 FAILED\", function() {",
+							"    pm.response.to.have.status(404);",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3300/movies/9999",
+					"host": [
+						"localhost"
+					],
+					"port": "3300",
+					"path": [
+						"movies",
+						"9999"
 					]
 				}
 			},
