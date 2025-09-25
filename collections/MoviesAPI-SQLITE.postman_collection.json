@@ -8,6 +8,29 @@
 	"item": [
 		{
 			"name": "GET Directors",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", function() {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"Header Content-Type adalah application/json\", function() {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"})",
+							"",
+							"pm.test(\"Body respons adalah sebuah array\", function() {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -26,6 +49,29 @@
 		},
 		{
 			"name": "GET Movies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", function() {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"Header Content-Type adalah application/json\", function() {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"})",
+							"",
+							"pm.test(\"Body respons adalah sebuah array\", function() {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -44,18 +90,43 @@
 		},
 		{
 			"name": "GET Directors by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", function() {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"Respons adalah objek dengan skema yang benar\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.all.keys('id','name','birthYear');",
+							"})",
+							"",
+							"pm.test(\"Nilai ID di dalam respons sesuai dengan yang diminta\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData.id).to.eql(1);",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3300/directors/2",
+					"raw": "localhost:3300/directors/1",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
 						"directors",
-						"2"
+						"1"
 					]
 				}
 			},
@@ -63,18 +134,43 @@
 		},
 		{
 			"name": "GET Movies by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", function() {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							"pm.test(\"Respons adalah objek dengan skema yang benar\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.all.keys('id','title','director','year');",
+							"})",
+							"",
+							"pm.test(\"Nilai ID di dalam respons sesuai dengan yang diminta\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData.id).to.eql(1);",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3300/movies/2",
+					"raw": "localhost:3300/movies/1",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
 						"movies",
-						"2"
+						"1"
 					]
 				}
 			},
@@ -82,6 +178,28 @@
 		},
 		{
 			"name": "POST Directors",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 201 Created\", () => {",
+							"    pm.response.to.have.status(201);",
+							"})",
+							"",
+							"pm.test(\"Respons berisi ID Film yang baru dibuat dan menyimpannya\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData.id).to.be.a('number');",
+							"",
+							"    // menyimpan id ke variabel koleksi",
+							"    pm.collectionVariables.set(\"CreateDirectorId\",jsonData.id)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -110,6 +228,28 @@
 		},
 		{
 			"name": "POST Movies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 201 Created\", () => {",
+							"    pm.response.to.have.status(201);",
+							"})",
+							"",
+							"pm.test(\"Respons berisi ID Film yang baru dibuat dan menyimpannya\", () => {",
+							"    const jsonData = pm.response.json().data;",
+							"    pm.expect(jsonData.id).to.be.a('number');",
+							"",
+							"    // menyimpan id ke variabel koleksi",
+							"    pm.collectionVariables.set(\"CreateMovieId\",jsonData.id)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -142,18 +282,34 @@
 		},
 		{
 			"name": "PUT Directors",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", () => {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"url": {
-					"raw": "localhost:3300/directors/1?name=Frank Darabont Updated&birthYear=1959",
+					"raw": "localhost:3300/directors/{{CreateDirectorId}}?name=Frank Darabont Updated&birthYear=1959",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
 						"directors",
-						"1"
+						"{{CreateDirectorId}}"
 					],
 					"query": [
 						{
@@ -171,27 +327,47 @@
 		},
 		{
 			"name": "PUT Movies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 OK\", () => {",
+							"    pm.response.to.have.status(200);",
+							"})",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"url": {
-					"raw": "localhost:3300/directors/1?name=Frank Darabont Updated&birthYear=1959",
+					"raw": "localhost:3300/movies/{{CreateMovieId}}?title=Inception&director=Christopher Nolan&year=2010",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
-						"directors",
-						"1"
+						"movies",
+						"{{CreateMovieId}}"
 					],
 					"query": [
 						{
-							"key": "name",
-							"value": "Frank Darabont Updated"
+							"key": "title",
+							"value": "Inception"
 						},
 						{
-							"key": "birthYear",
-							"value": "1959"
+							"key": "director",
+							"value": "Christopher Nolan"
+						},
+						{
+							"key": "year",
+							"value": "2010"
 						}
 					]
 				}
@@ -200,18 +376,32 @@
 		},
 		{
 			"name": "DELETE Directors by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 No Content\", () => {",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "localhost:3300/directors/3",
+					"raw": "localhost:3300/directors/{{CreateDirectorId}}",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
 						"directors",
-						"3"
+						"{{CreateDirectorId}}"
 					]
 				}
 			},
@@ -219,22 +409,46 @@
 		},
 		{
 			"name": "DELETE Movies by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status respons adalah 200 No Content\", () => {",
+							"    pm.response.to.have.status(200);",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "localhost:3300/movies/3",
+					"raw": "localhost:3300/movies/{{CreateMovieId}}",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
 						"movies",
-						"3"
+						"{{CreateMovieId}}"
 					]
 				}
 			},
 			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "CreateMovieId",
+			"value": ""
+		},
+		{
+			"key": "CreateDirectorId",
+			"value": ""
 		}
 	]
 }
