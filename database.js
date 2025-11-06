@@ -37,8 +37,24 @@ let movieDb = new sqlite3.Database(DBSOURCE_1, (err) => {
                     }
                 });
             });
+
+        movieDb.run(`CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username text NOT NULL UNIQUE,
+            password text NOT NULL
+            )`,
+            (err) => {
+                if (err) {
+                    console.error('Error membuat tabel:', err.message);
+                    return;
+                }
+            },
+        );
     }
+    
 });
+
+
 
 let directorDb = new sqlite3.Database(DBSOURCE_2, (err) => {
     if (err) {
@@ -70,7 +86,22 @@ let directorDb = new sqlite3.Database(DBSOURCE_2, (err) => {
                         directorDb.run(insert, ["David Fincher", 1962]);
                     }
                 });
-            });
+            }
+        );
+        directorDb.run(`CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username text NOT NULL UNIQUE,
+            password text NOT NULL
+            )`,
+            (err) => {
+                if (err) {
+                    console.error('Error membuat tabel:', err.message);
+                    return;
+                }
+            },
+        );
+
+            
     }
 });
 

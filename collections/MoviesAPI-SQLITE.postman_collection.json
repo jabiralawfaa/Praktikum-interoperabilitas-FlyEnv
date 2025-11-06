@@ -7,6 +7,97 @@
 	},
 	"item": [
 		{
+			"name": "REGISTER MOVIE",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"jadealtero\",\n    \"password\": \"secret7878\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3300/auth/register",
+					"host": [
+						"localhost"
+					],
+					"port": "3300",
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LOGIN MOVIE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Cek apakah response sukses (status code 200)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Jika sukses, ambil token dan simpan ke GLOBAL variable",
+							"pm.test(\"Set auth token globally\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    ",
+							"    if (jsonData && jsonData.token) {",
+							"        // Simpan token ke variabel GLOBAL bernama 'authToken'",
+							"        pm.globals.set(\"authToken\", jsonData.token);",
+							"        console.log(\"Token berhasil disimpan secara GLOBAL!\");",
+							"    } else {",
+							"        console.log(\"Token tidak ditemukan di response.\");",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"jadealtero\",\n    \"password\": \"secret7878\"\n}"
+				},
+				"url": {
+					"raw": "localhost:3300/auth/login",
+					"host": [
+						"localhost"
+					],
+					"port": "3300",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "GET Directors",
 			"event": [
 				{
@@ -297,26 +388,35 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authTokenDirectors}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Christopher Nolan\",\n    \"birthYear\": 1970\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "localhost:3300/directors?name=James Cameron&birthYear=1954",
+					"raw": "localhost:3300/directors",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
 						"directors"
-					],
-					"query": [
-						{
-							"key": "name",
-							"value": "James Cameron"
-						},
-						{
-							"key": "birthYear",
-							"value": "1954"
-						}
 					]
 				}
 			},
@@ -347,30 +447,35 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Interstellar\",\n    \"director\": \"Christopher Nolan\",\n    \"year\": 2014\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "localhost:3300/movies?title=Inception&director=Christopher Nolan&year=2010",
+					"raw": "localhost:3300/movies",
 					"host": [
 						"localhost"
 					],
 					"port": "3300",
 					"path": [
 						"movies"
-					],
-					"query": [
-						{
-							"key": "title",
-							"value": "Inception"
-						},
-						{
-							"key": "director",
-							"value": "Christopher Nolan"
-						},
-						{
-							"key": "year",
-							"value": "2010"
-						}
 					]
 				}
 			},
@@ -395,10 +500,29 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authTokenDirectors}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PUT",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Christopher Nolan (Updated)\",\n    \"birthYear\": 1970\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "localhost:3300/directors/{{CreateDirectorId}}?name=Frank Darabont Updated&birthYear=1959",
+					"raw": "localhost:3300/directors/{{CreateDirectorId}}",
 					"host": [
 						"localhost"
 					],
@@ -406,16 +530,6 @@
 					"path": [
 						"directors",
 						"{{CreateDirectorId}}"
-					],
-					"query": [
-						{
-							"key": "name",
-							"value": "Frank Darabont Updated"
-						},
-						{
-							"key": "birthYear",
-							"value": "1959"
-						}
 					]
 				}
 			},
@@ -440,10 +554,29 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "PUT",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Interstellar 2\",\n    \"director\": \"Christopher Nolan\",\n    \"year\": 2014\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "localhost:3300/movies/{{CreateMovieId}}?title=Inception&director=Christopher Nolan&year=2010",
+					"raw": "localhost:3300/movies/{{CreateMovieId}}",
 					"host": [
 						"localhost"
 					],
@@ -451,20 +584,6 @@
 					"path": [
 						"movies",
 						"{{CreateMovieId}}"
-					],
-					"query": [
-						{
-							"key": "title",
-							"value": "Inception"
-						},
-						{
-							"key": "director",
-							"value": "Christopher Nolan"
-						},
-						{
-							"key": "year",
-							"value": "2010"
-						}
 					]
 				}
 			},
@@ -487,6 +606,16 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authTokenDirectors}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "DELETE",
 				"header": [],
 				"url": {
@@ -520,6 +649,16 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "DELETE",
 				"header": [],
 				"url": {

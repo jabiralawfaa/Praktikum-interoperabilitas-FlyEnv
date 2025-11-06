@@ -3,6 +3,10 @@ const { movieDb, directorDb } = require('./database.js');
 const cors = require('cors');
 const express = require('express');
 const app = express();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const authenticateToken = require('./middleware/authMiddleware.js');
+const JWT_SECRET = process.env.JWT_SECRET;
 const port = process.env.PORT || 5173;
 
 // enable cors
@@ -10,6 +14,77 @@ app.use(cors());
 // middleware data
 app.use(express.json());
 
+// AUTHENTICATION movie endpoints
+app.post('/auth/register', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || password.length < 6) {
+    return res.status(400).json({ error: 'Username dan Password (min 6 char) harus diisi' });
+  }
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error("Error hashing password:", err);
+      return res.status(500).json({ error: 'Gagal memproses pendaftaran' });
+    }
+    const sql = 'INSERT INTO users (username, password) VALUES (?,?)';
+    const params = [username.toLowerCase(), hashedPassword];
+
+    movieDb.run(sql, params, function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint')) {
+          return res.status(400).json({ error: 'Username sudah digunakan'})
+        }
+        console.error("Error inserting user : ", err);
+        return res.status(500).json({ error: 'Gagal menyimpan pengguna' });
+      }
+      res.status(201).json({
+        message: "Registrasi Berhasil",
+        userId: this.lastID
+      })
+    });
+  })
+});
+
+app.post('/auth/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || password.length < 6) {
+    return res.status(400).json({ error: 'Username dan Password (min 6 char) harus diisi' });
+  }
+
+  const sql = 'SELECT * FROM users WHERE username = ?';
+  movieDb.get(sql, [username.toLowerCase()],(err,user) => {
+    if (err || !user){
+      return  res.status(400).json({ error: 'Kredensial tidak valid' });
+    }
+
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err || !isMatch) {
+        return res.status(400).json({ error: 'Kredensial tidak valid' });
+      }
+
+      const payload = {
+        user: {
+          id: user.id,
+          username: user.username
+        }
+      };
+
+      jwt.sign(payload, JWT_SECRET, { expiresIn: '1h'}, (err, token) => {
+        if (err) {
+          console.error("Error signing token:", err);
+          return res.status(500).json({ error: 'Gagal membuat token' });
+        }
+        res.json({
+          message: 'Login Berhasil',
+          token: token
+        })
+      })
+    })
+  });
+});
+
+
+// movie endpoints
 app.get('/movies', (req, res) => {
   const sql = "SELECT * FROM movie ORDER BY id ASC"; // Menggunakan movieDb
   movieDb.all(sql, [], (err, rows) => {
@@ -45,7 +120,8 @@ app.get('/movies/:id', (req, res) => {
   });
 });
 
-app.post('/movies', (req, res) => {
+app.post('/movies',authenticateToken, (req, res) => {
+  console.log("Request POST/movies oleh user:", req.user.username);
     const { title, director, year } = { 
     ...req.query, 
     ...req.body 
@@ -84,7 +160,8 @@ if (isNaN(year) || year < 1800 || year > new Date().getFullYear() + 5) {
 });
 
 // PUT (update) an existing movie
-app.put('/movies/:id', (req, res) => {
+app.put('/movies/:id',authenticateToken, (req, res) => {
+  console.log("Request PUT/movies oleh user:", req.user.username);
   const { title, director, year } = {
     ...req.query,
     ...req.body
@@ -125,7 +202,8 @@ app.put('/movies/:id', (req, res) => {
 });
 
 // DELETE a movie
-app.delete('/movies/:id', (req, res) => {
+app.delete('/movies/:id',authenticateToken, (req, res) => {
+  console.log("Request DELETE/movies oleh user:", req.user.username);
   const id = req.params.id;
   const sql = 'DELETE FROM movie WHERE id = ?';
   movieDb.run(sql, id, function(err) {
@@ -140,6 +218,76 @@ app.delete('/movies/:id', (req, res) => {
       changes: this.changes,
       id: parseInt(id)
     });
+  });
+});
+
+
+// AUTHENTICATION director endpoints
+app.post('/auth/director/register', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || password.length < 6) {
+    return res.status(400).json({ error: 'Username dan Password (min 6 char) harus diisi' });
+  }
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error("Error hashing password:", err);
+      return res.status(500).json({ error: 'Gagal memproses pendaftaran' });
+    }
+    const sql = 'INSERT INTO users (username, password) VALUES (?,?)';
+    const params = [username.toLowerCase(), hashedPassword];
+
+    directorDb.run(sql, params, function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint')) {
+          return res.status(400).json({ error: 'Username sudah digunakan'})
+        }
+        console.error("Error inserting user : ", err);
+        return res.status(500).json({ error: 'Gagal menyimpan pengguna' });
+      }
+      res.status(201).json({
+        message: "Registrasi Berhasil",
+        userId: this.lastID
+      })
+    });
+  })
+});
+
+app.post('/auth/director/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || password.length < 6) {
+    return res.status(400).json({ error: 'Username dan Password (min 6 char) harus diisi' });
+  }
+
+  const sql = 'SELECT * FROM users WHERE username = ?';
+  directorDb.get(sql, [username.toLowerCase()],(err,user) => {
+    if (err || !user){
+      return  res.status(400).json({ error: 'Kredensial tidak valid' });
+    }
+
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err || !isMatch) {
+        return res.status(400).json({ error: 'Kredensial tidak valid' });
+      }
+
+      const payload = {
+        user: {
+          id: user.id,
+          username: user.username
+        }
+      };
+
+      jwt.sign(payload, JWT_SECRET, { expiresIn: '1h'}, (err, token) => {
+        if (err) {
+          console.error("Error signing token:", err);
+          return res.status(500).json({ error: 'Gagal membuat token' });
+        }
+        res.json({
+          message: 'Login Berhasil',
+          token: token
+        })
+      })
+    })
   });
 });
 
@@ -177,7 +325,8 @@ app.get('/directors/:id', (req, res) => {
   });
 });
 
-app.post('/directors', (req, res) => {
+app.post('/directors',authenticateToken, (req, res) => {
+  console.log("Request POST/directors oleh user:", req.user.username);
   const { name, birthYear } = {
     ...req.query,
     ...req.body
@@ -211,7 +360,8 @@ app.post('/directors', (req, res) => {
   });
 });
 
-app.put('/directors/:id', (req, res) => {
+app.put('/directors/:id',authenticateToken, (req, res) => {
+  console.log("Request PUT/directors oleh user:", req.user.username);
   const { name, birthYear } = {
     ...req.query,
     ...req.body
@@ -251,7 +401,8 @@ app.put('/directors/:id', (req, res) => {
 });
 
 
-app.delete('/directors/:id', (req, res) => {
+app.delete('/directors/:id', authenticateToken, (req, res) => {
+  console.log("Request DELETE/directors oleh user:", req.user.username);
   const id = req.params.id;
   const sql = 'DELETE FROM directors WHERE id = ?';
   directorDb.run(sql, id, function(err) {
