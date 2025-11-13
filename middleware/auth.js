@@ -11,7 +11,6 @@ function authenticateToken(req, res, next) {
 
     jwt.verify(token, JWT_SECRET, (err, decodedPayload) => {
         if (err) {
-            console.error("JWT Verify error : ", err);
             return res.status(403).json({ error: 'Token tidak valid atau kadaluarsa' });
         }
         req.user = decodedPayload.user;
@@ -19,4 +18,17 @@ function authenticateToken(req, res, next) {
     });
 }
 
-module.exports = authenticateToken;
+// verifikasi role
+function authorizeRoles(role){
+    return (req,res,next) => {
+        if (req.user && req.user.role == role) {
+            next();
+        } else {
+            return res.status(403).json({
+                error: "Akses dilarang : Peran tidak memadai "
+            });
+        }
+    }
+}
+
+module.exports = {authenticateToken, authorizeRoles};

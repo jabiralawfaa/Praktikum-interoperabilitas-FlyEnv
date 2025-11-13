@@ -41,7 +41,8 @@ let movieDb = new sqlite3.Database(DBSOURCE_1, (err) => {
         movieDb.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username text NOT NULL UNIQUE,
-            password text NOT NULL
+            password text NOT NULL,
+            role text NOT NULL DEFAULT 'user'
             )`,
             (err) => {
                 if (err) {
@@ -91,7 +92,8 @@ let directorDb = new sqlite3.Database(DBSOURCE_2, (err) => {
         directorDb.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username text NOT NULL UNIQUE,
-            password text NOT NULL
+            password text NOT NULL,
+            role text NOT NULL DEFAULT 'user'
             )`,
             (err) => {
                 if (err) {

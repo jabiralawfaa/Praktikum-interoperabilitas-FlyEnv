@@ -5,7 +5,7 @@ const express = require('express');
 const app = express();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const authenticateToken = require('./middleware/authMiddleware.js');
+const {authenticateToken, authorizeRoles} = require('./middleware/auth.js');
 const JWT_SECRET = process.env.JWT_SECRET;
 const port = process.env.PORT || 5173;
 
@@ -26,13 +26,44 @@ app.post('/auth/register', (req, res) => {
       console.error("Error hashing password:", err);
       return res.status(500).json({ error: 'Gagal memproses pendaftaran' });
     }
-    const sql = 'INSERT INTO users (username, password) VALUES (?,?)';
-    const params = [username.toLowerCase(), hashedPassword];
+    const sql = 'INSERT INTO users (username, password, role) VALUES (?,?,?)';
+    const params = [username.toLowerCase(), hashedPassword,'user'];
 
     movieDb.run(sql, params, function(err) {
       if (err) {
         if (err.message.includes('UNIQUE constraint')) {
           return res.status(400).json({ error: 'Username sudah digunakan'})
+        }
+        console.error("Error inserting user : ", err);
+        return res.status(500).json({ error: 'Gagal menyimpan pengguna' });
+      }
+      res.status(201).json({
+        message: "Registrasi Berhasil",
+        userId: this.lastID
+      })
+    });
+  })
+});
+
+// SETELAH PENGUJIAN HAPUS/KOMEN
+app.post('/auth/register-admin', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || password.length < 6) {
+    return res.status(400).json({ error: 'Username dan Password (min 6 char) harus diisi' });
+  }
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error("Error hashing password:", err);
+      return res.status(500).json({ error: 'Gagal memproses pendaftaran' });
+    }
+    const sql = 'INSERT INTO users (username, password, role) VALUES (?,?,?)';
+    const params = [username.toLowerCase(), hashedPassword,'admin'];
+
+    movieDb.run(sql, params, function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint')) {
+          return res.status(400).json({ error: 'Username admin sudah digunakan'})
         }
         console.error("Error inserting user : ", err);
         return res.status(500).json({ error: 'Gagal menyimpan pengguna' });
@@ -65,7 +96,8 @@ app.post('/auth/login', (req, res) => {
       const payload = {
         user: {
           id: user.id,
-          username: user.username
+          username: user.username,
+          role: user.role
         }
       };
 
@@ -160,7 +192,7 @@ if (isNaN(year) || year < 1800 || year > new Date().getFullYear() + 5) {
 });
 
 // PUT (update) an existing movie
-app.put('/movies/:id',authenticateToken, (req, res) => {
+app.put('/movies/:id', [authenticateToken, authorizeRoles('admin')], (req, res) => {
   console.log("Request PUT/movies oleh user:", req.user.username);
   const { title, director, year } = {
     ...req.query,
@@ -202,7 +234,7 @@ app.put('/movies/:id',authenticateToken, (req, res) => {
 });
 
 // DELETE a movie
-app.delete('/movies/:id',authenticateToken, (req, res) => {
+app.delete('/movies/:id', [authenticateToken, authorizeRoles('admin')], (req, res) => {
   console.log("Request DELETE/movies oleh user:", req.user.username);
   const id = req.params.id;
   const sql = 'DELETE FROM movie WHERE id = ?';
@@ -234,13 +266,43 @@ app.post('/auth/director/register', (req, res) => {
       console.error("Error hashing password:", err);
       return res.status(500).json({ error: 'Gagal memproses pendaftaran' });
     }
-    const sql = 'INSERT INTO users (username, password) VALUES (?,?)';
-    const params = [username.toLowerCase(), hashedPassword];
+    const sql = 'INSERT INTO users (username, password, role) VALUES (?,?,?)';
+    const params = [username.toLowerCase(), hashedPassword, 'user'];
 
     directorDb.run(sql, params, function(err) {
       if (err) {
         if (err.message.includes('UNIQUE constraint')) {
           return res.status(400).json({ error: 'Username sudah digunakan'})
+        }
+        console.error("Error inserting user : ", err);
+        return res.status(500).json({ error: 'Gagal menyimpan pengguna' });
+      }
+      res.status(201).json({
+        message: "Registrasi Berhasil",
+        userId: this.lastID
+      })
+    });
+  })
+});
+
+app.post('/auth/director/register-admin', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password || password.length < 6) {
+    return res.status(400).json({ error: 'Username dan Password (min 6 char) harus diisi' });
+  }
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error("Error hashing password:", err);
+      return res.status(500).json({ error: 'Gagal memproses pendaftaran' });
+    }
+    const sql = 'INSERT INTO users (username, password, role) VALUES (?,?,?)';
+    const params = [username.toLowerCase(), hashedPassword, 'admin'];
+
+    directorDb.run(sql, params, function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint')) {
+          return res.status(400).json({ error: 'Username admin sudah digunakan'})
         }
         console.error("Error inserting user : ", err);
         return res.status(500).json({ error: 'Gagal menyimpan pengguna' });
@@ -273,7 +335,8 @@ app.post('/auth/director/login', (req, res) => {
       const payload = {
         user: {
           id: user.id,
-          username: user.username
+          username: user.username,
+          role: user.role
         }
       };
 
@@ -360,7 +423,7 @@ app.post('/directors',authenticateToken, (req, res) => {
   });
 });
 
-app.put('/directors/:id',authenticateToken, (req, res) => {
+app.put('/directors/:id',[authenticateToken, authorizeRoles('admin')], (req, res) => {
   console.log("Request PUT/directors oleh user:", req.user.username);
   const { name, birthYear } = {
     ...req.query,
@@ -401,7 +464,7 @@ app.put('/directors/:id',authenticateToken, (req, res) => {
 });
 
 
-app.delete('/directors/:id', authenticateToken, (req, res) => {
+app.delete('/directors/:id', [authenticateToken, authorizeRoles('admin')], (req, res) => {
   console.log("Request DELETE/directors oleh user:", req.user.username);
   const id = req.params.id;
   const sql = 'DELETE FROM directors WHERE id = ?';

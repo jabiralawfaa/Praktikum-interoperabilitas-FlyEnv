@@ -7,6 +7,35 @@
 	},
 	"item": [
 		{
+			"name": "REGISTER ADMIN MOVIE",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"adminjade\",\n    \"password\": \"leonet123\"\n}"
+				},
+				"url": {
+					"raw": "localhost:3300/auth/register-admin",
+					"host": [
+						"localhost"
+					],
+					"port": "3300",
+					"path": [
+						"auth",
+						"register-admin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "REGISTER MOVIE",
 			"request": {
 				"method": "POST",
@@ -19,7 +48,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"jadealtero\",\n    \"password\": \"secret7878\"\n}",
+					"raw": "{\n    \"username\": \"jadealteroleo\",\n    \"password\": \"secret7878\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -81,7 +110,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"username\": \"jadealtero\",\n    \"password\": \"secret7878\"\n}"
+					"raw": "{\n    \"username\": \"adminjade\",\n    \"password\": \"leonet123\"\n}"
 				},
 				"url": {
 					"raw": "localhost:3300/auth/login",
@@ -91,6 +120,99 @@
 					"port": "3300",
 					"path": [
 						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REGISTER DIRECTOR",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"jabiralawfaa\",\n    \"password\": \"NATIVE7878\"\n}"
+				},
+				"url": {
+					"raw": "localhost:3300/auth/director/register",
+					"host": [
+						"localhost"
+					],
+					"port": "3300",
+					"path": [
+						"auth",
+						"director",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "LOGIN DIRECTOR",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Cek apakah response sukses (status code 200)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"// Jika sukses, ambil token dan simpan ke GLOBAL variable",
+							"pm.test(\"Set auth token globally\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    ",
+							"    if (jsonData && jsonData.token) {",
+							"        // Simpan token ke variabel GLOBAL bernama 'authToken'",
+							"        pm.globals.set(\"authTokenDirectors\", jsonData.token);",
+							"        console.log(\"Token berhasil disimpan secara GLOBAL!\");",
+							"    } else {",
+							"        console.log(\"Token tidak ditemukan di response.\");",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"jabiralawfaa\",\n    \"password\": \"NATIVE7878\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3300/auth/director/login",
+					"host": [
+						"localhost"
+					],
+					"port": "3300",
+					"path": [
+						"auth",
+						"director",
 						"login"
 					]
 				}
@@ -461,7 +583,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"title\": \"Interstellar\",\n    \"director\": \"Christopher Nolan\",\n    \"year\": 2014\n}",
+					"raw": "{\n    \"title\": \"The Matrix\",\n    \"director\": \"The Wachowskis\",\n    \"year\": 1999\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -568,7 +690,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"title\": \"Interstellar 2\",\n    \"director\": \"Christopher Nolan\",\n    \"year\": 2014\n}",
+					"raw": "{\n    \"title\": \"The Matrix (test update)\",\n    \"director\": \"The Wachowskis\",\n    \"year\": 1999\n}",
 					"options": {
 						"raw": {
 							"language": "json"
